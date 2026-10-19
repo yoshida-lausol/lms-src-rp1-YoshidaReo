@@ -258,8 +258,7 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
 			
 			
-			dailyAttendanceForm.setDispStartHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingStartTime()));
-			dailyAttendanceForm.setDispStartMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingStartTime()));
+			dailyAttendanceForm.setDispStartHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingStartTime()));			dailyAttendanceForm.setDispStartMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingStartTime()));
 			
 			dailyAttendanceForm.setDispEndHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingEndTime()));
 			dailyAttendanceForm.setDispEndMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingEndTime()));;
