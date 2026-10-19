@@ -69,6 +69,8 @@ public class StudentAttendanceService {
 			if (statusEnum != null) {
 				dto.setStatusDispName(statusEnum.name);
 			}
+			
+			
 		}
 
 		return attendanceManagementDtoList;
@@ -220,6 +222,9 @@ public class StudentAttendanceService {
 		attendanceForm.setUserName(loginUserDto.getUserName());
 		attendanceForm.setLeaveFlg(loginUserDto.getLeaveFlg());
 		attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+		attendanceForm.setHourMap(attendanceUtil.getHourMap());
+		attendanceForm.setMinuteMap(attendanceUtil.getMinuteMap());
+		;
 
 		// 途中退校している場合のみ設定
 		if (loginUserDto.getLeaveDate() != null) {
@@ -251,6 +256,13 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setDispTrainingDate(dateUtil
 					.dateToString(attendanceManagementDto.getTrainingDate(), "yyyy年M月d日(E)"));
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
+			
+			
+			dailyAttendanceForm.setDispStartHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingStartTime()));
+			dailyAttendanceForm.setDispStartMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingStartTime()));
+			
+			dailyAttendanceForm.setDispEndHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingEndTime()));
+			dailyAttendanceForm.setDispEndMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingEndTime()));;
 
 			attendanceForm.getAttendanceList().add(dailyAttendanceForm);
 		}
@@ -343,11 +355,15 @@ public class StudentAttendanceService {
 	 */
 	public Boolean notEnterCheck() throws ParseException{
 		
-		SimpleDateFormat sdf = new SimpleDateFormat();
-		// 当日日付
-		Date date = new Date();
-		// 本日の研修日
-		Date trainingDate = attendanceUtil.getTrainingDate();
+		// 本日の研修日の取得
+		// Date trainingDate = attendanceUtil.getTrainingDate();
+		
+		// フォーマットを定義
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/M/d");
+        // 現在日時をフォーマットした文字列に
+        String dateStr = sdf.format(new Date());
+        // 文字列をDate型にパース
+        Date trainingDate = sdf.parse(dateStr);
 		// 勤怠未入力数の取得
 		Integer blankEntryCount = tStudentAttendanceMapper.notEnterCount(
 						loginUserDto.getLmsUserId(),
@@ -355,10 +371,15 @@ public class StudentAttendanceService {
 						trainingDate);
 		if(blankEntryCount > 0) {
 			return true;
-		}else {
-			return false;
 		}
+		return false;
 	}
 	
 	
+	/*
+	 * フォーム内の「時」と「分」の入力を、「hh:mm」形式の文字列に変換してセットする。
+	 * */
+	public void formatConversion(AttendanceForm attendanceForm) {
+		
+	}
 }

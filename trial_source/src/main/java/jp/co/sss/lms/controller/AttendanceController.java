@@ -48,7 +48,7 @@ public class AttendanceController {
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 		
 		
-		
+		// 未記入日の確認
 		boolean hasBlankEntry  = studentAttendanceService.notEnterCheck();
 		model.addAttribute("hasBlankEntry", hasBlankEntry);
 		
