@@ -306,13 +306,13 @@ public class StudentAttendanceService {
 			tStudentAttendance.setLmsUserId(lmsUserId);
 			tStudentAttendance.setAccountId(loginUserDto.getAccountId());
 			// 出勤時刻整形
-			TrainingTime trainingStartTime = null;
-			trainingStartTime = new TrainingTime(dailyAttendanceForm.getTrainingStartTime());
-			tStudentAttendance.setTrainingStartTime(trainingStartTime.getFormattedString());
-			// 退勤時刻整形
-			TrainingTime trainingEndTime = null;
-			trainingEndTime = new TrainingTime(dailyAttendanceForm.getTrainingEndTime());
-			tStudentAttendance.setTrainingEndTime(trainingEndTime.getFormattedString());
+            TrainingTime trainingStartTime = null;
+            trainingStartTime = new TrainingTime(dailyAttendanceForm.getTrainingStartTime());
+            tStudentAttendance.setTrainingStartTime(trainingStartTime.getFormattedString());
+            // 退勤時刻整形
+            TrainingTime trainingEndTime = null;
+            trainingEndTime = new TrainingTime(dailyAttendanceForm.getTrainingEndTime());
+            tStudentAttendance.setTrainingEndTime(trainingEndTime.getFormattedString());
 			// 中抜け時間
 			tStudentAttendance.setBlankTime(dailyAttendanceForm.getBlankTime());
 			// 遅刻早退ステータス
@@ -376,9 +376,21 @@ public class StudentAttendanceService {
 	
 	
 	/*
-	 * フォーム内の「時」と「分」の入力を、「hh:mm」形式の文字列に変換してセットする。
+	 * フォーム内の「時」と「分」の入力を、「hh:mm」形式の文字列に変換してAttendanceFormにセットする。
 	 * */
 	public void formatConversion(AttendanceForm attendanceForm) {
-		
+		System.out.println("リストの件数: " + attendanceForm.getAttendanceList().size());
+		for (DailyAttendanceForm dailyAttendanceForm : attendanceForm.getAttendanceList()) {
+			System.out.println("@@@@ NUL?? : " + dailyAttendanceForm.getDispStartHour());
+			int sh = (dailyAttendanceForm.getDispStartHour() == null)? 0 :dailyAttendanceForm.getDispStartHour();
+			int sm = (dailyAttendanceForm.getDispStartMinute() == null)? 0: dailyAttendanceForm.getDispStartMinute();
+			String startTimeString  = String.format("%02d:%02d", sh, sm);
+			dailyAttendanceForm.setTrainingStartTime(startTimeString);
+			
+			int eh = (dailyAttendanceForm.getDispEndHour() == null)? 0 :dailyAttendanceForm.getDispEndHour();
+			int em = (dailyAttendanceForm.getDispEndMinute() == null)? 0: dailyAttendanceForm.getDispEndMinute();
+			String endTimeString  = String.format("%02d:%02d", eh, em);
+			dailyAttendanceForm.setTrainingEndTime(endTimeString);
+		}
 	}
 }
