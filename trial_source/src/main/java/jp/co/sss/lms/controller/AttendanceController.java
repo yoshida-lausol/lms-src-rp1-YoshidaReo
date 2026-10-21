@@ -2,8 +2,10 @@ package jp.co.sss.lms.controller;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,6 +31,7 @@ public class AttendanceController {
 	private StudentAttendanceService studentAttendanceService;
 	@Autowired
 	private LoginUserDto loginUserDto;
+	@Autowired MessageSource messageSource;
 
 	/**
 	 * 勤怠管理画面 初期表示
@@ -138,8 +141,32 @@ public class AttendanceController {
 	@RequestMapping(path = "/update", params = "complete", method = RequestMethod.POST)
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
 			throws ParseException {
+		
+		// 入力チェック（resultは参照渡しなので、returnがいらない）
+		studentAttendanceService.updateInputCheck(attendanceForm,result);
+		if(result.hasErrors()) {
+			// すべてのエラーメッセージを取得して、読点「、」や改行で繋げる
+		    String allErrors = result.getFieldErrors().stream()
+		            .map(error -> messageSource.getMessage(error, Locale.getDefault()))
+		            .collect(java.util.stream.Collectors.joining("<br>* ")); 
+//			FieldError fieldError = result.getFieldError();
+//			String message = messageSource.getMessage(fieldError, Locale.getDefault());
+			model.addAttribute("error", allErrors);
+			
+			// 勤怠管理リストの再取得
+			List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
+					.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
+			// 勤怠フォームの再生成
+			attendanceForm = studentAttendanceService
+					.setAttendanceForm(attendanceManagementDtoList);
+			model.addAttribute("attendanceForm", attendanceForm);
+             
+			return "attendance/update";
+		}
+		
 		// 時間の形式変換
 		studentAttendanceService.formatConversion(attendanceForm);
+		
 		// 更新
 		String message = studentAttendanceService.update(attendanceForm);
 		model.addAttribute("message", message);

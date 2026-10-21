@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
@@ -258,7 +259,8 @@ public class StudentAttendanceService {
 			dailyAttendanceForm.setStatusDispName(attendanceManagementDto.getStatusDispName());
 			
 			
-			dailyAttendanceForm.setDispStartHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingStartTime()));			dailyAttendanceForm.setDispStartMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingStartTime()));
+			dailyAttendanceForm.setDispStartHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingStartTime()));
+			dailyAttendanceForm.setDispStartMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingStartTime()));
 			
 			dailyAttendanceForm.setDispEndHour(attendanceUtil.getHour(attendanceManagementDto.getTrainingEndTime()));
 			dailyAttendanceForm.setDispEndMinute(attendanceUtil.getMinute(attendanceManagementDto.getTrainingEndTime()));;
@@ -379,18 +381,84 @@ public class StudentAttendanceService {
 	 * フォーム内の「時」と「分」の入力を、「hh:mm」形式の文字列に変換してAttendanceFormにセットする。
 	 * */
 	public void formatConversion(AttendanceForm attendanceForm) {
-		System.out.println("リストの件数: " + attendanceForm.getAttendanceList().size());
 		for (DailyAttendanceForm dailyAttendanceForm : attendanceForm.getAttendanceList()) {
-			System.out.println("@@@@ NUL?? : " + dailyAttendanceForm.getDispStartHour());
-			int sh = (dailyAttendanceForm.getDispStartHour() == null)? 0 :dailyAttendanceForm.getDispStartHour();
-			int sm = (dailyAttendanceForm.getDispStartMinute() == null)? 0: dailyAttendanceForm.getDispStartMinute();
-			String startTimeString  = String.format("%02d:%02d", sh, sm);
-			dailyAttendanceForm.setTrainingStartTime(startTimeString);
+			if(dailyAttendanceForm.getDispStartHour() != null && dailyAttendanceForm.getDispStartMinute() != null) {
+				int sh = dailyAttendanceForm.getDispStartHour();
+				int sm = dailyAttendanceForm.getDispStartMinute();
+				String startTimeString  = String.format("%02d:%02d", sh, sm);
+				dailyAttendanceForm.setTrainingStartTime(startTimeString);
+			}
 			
-			int eh = (dailyAttendanceForm.getDispEndHour() == null)? 0 :dailyAttendanceForm.getDispEndHour();
-			int em = (dailyAttendanceForm.getDispEndMinute() == null)? 0: dailyAttendanceForm.getDispEndMinute();
-			String endTimeString  = String.format("%02d:%02d", eh, em);
-			dailyAttendanceForm.setTrainingEndTime(endTimeString);
+			if(dailyAttendanceForm.getDispEndHour() != null && dailyAttendanceForm.getDispEndMinute() != null) {
+				int eh = dailyAttendanceForm.getDispEndHour();
+				int em = dailyAttendanceForm.getDispEndMinute();
+				String endTimeString  = String.format("%02d:%02d", eh, em);
+				dailyAttendanceForm.setTrainingEndTime(endTimeString);
+			}
+			
+		}
+	}
+	
+	/*
+	 * 勤怠更新時の入力チェック
+	 * (文字数、時刻の整合性、中抜け時間の妥当性)
+	 * */
+	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) {
+		
+		int index = 0;
+		for (DailyAttendanceForm dailyAttendanceForm : attendanceForm.getAttendanceList()) {
+			// 備考の文字数制限
+			if(dailyAttendanceForm.getNote() != null && dailyAttendanceForm.getNote().length() > 100) {
+				result.rejectValue(
+						"attendanceList["+index+"].note",
+						"maxlength",
+						new Object[] {"備考", 100},
+						"備考の文字数が100文字を超えています。"
+						);
+			}
+			// 入力パラメータ．勤怠リスト[n]．出勤時間（時）、出勤時間（分）の一方が入力有り　＆　もう一方が入力なしの場合
+			if(dailyAttendanceForm.getDispStartHour() != null && dailyAttendanceForm.getDispStartMinute() == null
+					|| dailyAttendanceForm.getDispStartMinute() != null &&  dailyAttendanceForm.getDispStartHour() == null ) {
+					if(dailyAttendanceForm.getDispStartHour() == null) {
+						result.rejectValue(
+								"attendanceList["+index+"].dispStartHour",
+								"input.invalid",
+								new Object[] {"出勤時間（時）"},
+								"出勤時間（時）は必須です。"
+								);
+					}
+					if(dailyAttendanceForm.getDispStartMinute() == null) {
+						result.rejectValue(
+								"attendanceList["+index+"].dispStartMinute",
+								"input.invalid",
+								new Object[] {"出勤時間（分）"},
+								"出勤時間（分）は必須です。"
+								);
+					}
+					
+			}
+			// 入力パラメータ．勤怠リスト[n]．退勤時間（時）、退勤時間（分）の一方が入力有り　＆　もう一方が入力なしの場合
+			if(dailyAttendanceForm.getDispEndHour() != null && dailyAttendanceForm.getDispEndMinute() == null
+					|| dailyAttendanceForm.getDispEndMinute() != null &&  dailyAttendanceForm.getDispEndHour() == null ) {
+					if(dailyAttendanceForm.getDispStartHour() == null) {
+						result.rejectValue(
+								"attendanceList["+index+"].dispEndHour",
+								"input.invalid",
+								new Object[] {"退勤時間（時）"},
+								"退勤時間（時）は必須です。"
+								);
+					}
+					if(dailyAttendanceForm.getDispStartMinute() == null) {
+						result.rejectValue(
+								"attendanceList["+index+"].dispEndMinute",
+								"input.invalid",
+								new Object[] {"退勤時間（分）"},
+								"退勤時間（分）は必須です。"
+								);
+					}
+					
+			}
+			index++;
 		}
 	}
 }
