@@ -2,6 +2,8 @@ package jp.co.sss.lms.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -416,48 +418,101 @@ public class StudentAttendanceService {
 						"備考の文字数が100文字を超えています。"
 						);
 			}
-			// 入力パラメータ．勤怠リスト[n]．出勤時間（時）、出勤時間（分）の一方が入力有り　＆　もう一方が入力なしの場合
-			if(dailyAttendanceForm.getDispStartHour() != null && dailyAttendanceForm.getDispStartMinute() == null
-					|| dailyAttendanceForm.getDispStartMinute() != null &&  dailyAttendanceForm.getDispStartHour() == null ) {
-					if(dailyAttendanceForm.getDispStartHour() == null) {
-						result.rejectValue(
-								"attendanceList["+index+"].dispStartHour",
-								"input.invalid",
-								new Object[] {"出勤時間（時）"},
-								"出勤時間（時）は必須です。"
-								);
-					}
-					if(dailyAttendanceForm.getDispStartMinute() == null) {
-						result.rejectValue(
-								"attendanceList["+index+"].dispStartMinute",
-								"input.invalid",
-								new Object[] {"出勤時間（分）"},
-								"出勤時間（分）は必須です。"
-								);
-					}
-					
+			
+			// 勤怠リスト[n]．出勤時間（時）、出勤時間（分）の一方が入力有り　＆　もう一方が入力なしの場合
+			if(dailyAttendanceForm.getDispStartMinute() != null && dailyAttendanceForm.getDispStartHour() == null) {
+				result.rejectValue(
+					"attendanceList["+index+"].dispStartHour",
+					"input.invalid",
+					new Object[] {"出勤時間"},
+					"出勤時間が正しく入力されていません。"
+				);
+				System.out.println("attendanceList["+index+"].dispStartHour");
 			}
-			// 入力パラメータ．勤怠リスト[n]．退勤時間（時）、退勤時間（分）の一方が入力有り　＆　もう一方が入力なしの場合
-			if(dailyAttendanceForm.getDispEndHour() != null && dailyAttendanceForm.getDispEndMinute() == null
-					|| dailyAttendanceForm.getDispEndMinute() != null &&  dailyAttendanceForm.getDispEndHour() == null ) {
-					if(dailyAttendanceForm.getDispStartHour() == null) {
-						result.rejectValue(
-								"attendanceList["+index+"].dispEndHour",
-								"input.invalid",
-								new Object[] {"退勤時間（時）"},
-								"退勤時間（時）は必須です。"
-								);
-					}
-					if(dailyAttendanceForm.getDispStartMinute() == null) {
-						result.rejectValue(
-								"attendanceList["+index+"].dispEndMinute",
-								"input.invalid",
-								new Object[] {"退勤時間（分）"},
-								"退勤時間（分）は必須です。"
-								);
-					}
-					
+			if(dailyAttendanceForm.getDispStartHour() != null && dailyAttendanceForm.getDispStartMinute() == null) {
+				result.rejectValue(
+					"attendanceList["+index+"].dispStartMinute",
+					"input.invalid",
+					new Object[] {"出勤時間"},
+					"出勤時間が正しく入力されていません。"
+				);
 			}
+			
+			// 勤怠リスト[n]．退勤時間（時）、退勤時間（分）の一方が入力有り　＆　もう一方が入力なしの場合
+			if(dailyAttendanceForm.getDispEndMinute() != null &&  dailyAttendanceForm.getDispEndHour() == null ) {
+				result.rejectValue(
+						"attendanceList["+index+"].dispEndHour",
+						"input.invalid",
+						new Object[] {"退勤時間"},
+						"出勤時間が正しく入力されていません。"
+				);					
+			}
+			if(dailyAttendanceForm.getDispEndHour() != null && dailyAttendanceForm.getDispEndMinute() == null ) {
+				result.rejectValue(
+						"attendanceList["+index+"].dispEndMinute",
+						"input.invalid",
+						new Object[] {"退勤時間"},
+						"出勤時間が正しく入力されていません。"
+				);					
+			}
+			
+			// 出勤時間に入力なし　＆　退勤時間に入力あり　の場合
+			if(dailyAttendanceForm.getDispEndHour() != null && dailyAttendanceForm.getDispEndMinute() != null) {
+				if(dailyAttendanceForm.getDispStartHour() == null && dailyAttendanceForm.getDispStartMinute() == null) {
+					result.rejectValue(
+							"attendanceList["+index+"].dispStartHour",
+							null,
+							null,
+							""
+						);
+					result.rejectValue(
+							"attendanceList["+index+"].dispStartMinute",
+							null,
+							null,
+							""
+						);
+					result.reject("attendance.punchInEmpty",null,null);
+				}
+			}
+			
+
+			if(dailyAttendanceForm.getDispStartHour() != null && dailyAttendanceForm.getDispStartMinute() != null &&dailyAttendanceForm.getDispEndHour() != null && dailyAttendanceForm.getDispEndMinute() != null) {
+				LocalTime localStartTime = LocalTime.of(dailyAttendanceForm.getDispStartHour(), dailyAttendanceForm.getDispStartMinute());
+				LocalTime localEndTime = LocalTime.of(dailyAttendanceForm.getDispEndHour(), dailyAttendanceForm.getDispEndMinute());
+			//	出勤時間　＞　退勤時間　の場合
+				if(localEndTime.isBefore(localStartTime)) {
+					result.rejectValue(
+							"attendanceList["+index+"].dispStartHour",
+							null,
+							null,
+							""
+						);
+					result.rejectValue(
+							"attendanceList["+index+"].dispStartMinute",
+							null,
+							null,
+							""
+						);
+					result.reject("attendance.trainingTimeRange",new Object[] {index},"退勤時刻は出勤時刻より後でなければいけません。");
+				}
+			//	中抜け時間が勤務時間（出勤時間～退勤時間までの時間）を超える場合
+				if(dailyAttendanceForm.getBlankTime() != null) {
+					Duration localDurationTime = Duration.between(localStartTime, localEndTime);
+					long totalMinute = localDurationTime.toMinutes();
+					if(totalMinute < dailyAttendanceForm.getBlankTime()) {
+						result.rejectValue(
+								"attendanceList["+index+"].blankTime",
+								null,
+								null,
+								""
+							);
+						result.reject("attendance.blankTimeError",null,null);
+					}
+				}
+				
+			}
+			
+			
 			index++;
 		}
 	}

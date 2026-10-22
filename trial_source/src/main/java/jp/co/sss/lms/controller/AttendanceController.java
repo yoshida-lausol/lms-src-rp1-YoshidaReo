@@ -16,6 +16,7 @@ import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.form.AttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
+import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
 
 /**
@@ -30,8 +31,11 @@ public class AttendanceController {
 	@Autowired
 	private StudentAttendanceService studentAttendanceService;
 	@Autowired
+	private AttendanceUtil attendanceUtil;
+	@Autowired
 	private LoginUserDto loginUserDto;
-	@Autowired MessageSource messageSource;
+	@Autowired
+	MessageSource messageSource;
 
 	/**
 	 * 勤怠管理画面 初期表示
@@ -49,12 +53,10 @@ public class AttendanceController {
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
-		
-		
+
 		// 未記入日の確認
-		boolean hasBlankEntry  = studentAttendanceService.notEnterCheck();
+		boolean hasBlankEntry = studentAttendanceService.notEnterCheck();
 		model.addAttribute("hasBlankEntry", hasBlankEntry);
-		
 
 		return "attendance/detail";
 	}
@@ -139,28 +141,24 @@ public class AttendanceController {
 	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/update", params = "complete", method = RequestMethod.POST)
-	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
+	public String complete(AttendanceForm attendanceForm, BindingResult result, Model model)
 			throws ParseException {
 		
 		// 入力チェック（resultは参照渡しなので、returnがいらない）
 		studentAttendanceService.updateInputCheck(attendanceForm,result);
 		if(result.hasErrors()) {
-			// すべてのエラーメッセージを取得して、読点「、」や改行で繋げる
-		    String allErrors = result.getFieldErrors().stream()
-		            .map(error -> messageSource.getMessage(error, Locale.getDefault()))
-		            .collect(java.util.stream.Collectors.joining("<br>* ")); 
-//			FieldError fieldError = result.getFieldError();
-//			String message = messageSource.getMessage(fieldError, Locale.getDefault());
+			// エラーが複数ある時の処理
+			String allErrors = result.getAllErrors().stream()
+	        .map(error -> messageSource.getMessage(error, Locale.getDefault()))
+	        .filter(msg -> msg != null && !msg.trim().isEmpty())
+	        .collect(java.util.stream.Collectors.joining("<br>* ")); 
+			// エラー登録
 			model.addAttribute("error", allErrors);
 			
-			// 勤怠管理リストの再取得
-			List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
-					.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
-			// 勤怠フォームの再生成
-			attendanceForm = studentAttendanceService
-					.setAttendanceForm(attendanceManagementDtoList);
-			model.addAttribute("attendanceForm", attendanceForm);
-             
+			attendanceForm.setHourMap(attendanceUtil.getHourMap());
+			attendanceForm.setMinuteMap(attendanceUtil.getMinuteMap());
+			
+			
 			return "attendance/update";
 		}
 		
