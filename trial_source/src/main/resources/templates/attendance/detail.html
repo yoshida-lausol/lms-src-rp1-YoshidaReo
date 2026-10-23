@@ -77,7 +77,8 @@
 	<script type="text/javascript" th:inline="javascript">
 		
 		$(function() {
-				
+			
+			// 吉田令生 – Task.25
 			const isBlankEntry = /*[[${hasBlankEntry}]]*/ false;
 			if(isBlankEntry){
 				alert("過去日の勤怠に未入力があります。");
@@ -95,6 +96,10 @@
 			return hours + ':' + minutes;
 		}
 	</script>
-
+	<style>
+		.info{
+			background-color: #d9edf7;
+		}
+	</style>
 </body>
 </html>

@@ -37,6 +37,7 @@
 						<tr>
 							<th class="w140">日付</th>
 							<th class="w140">コース内容</th>
+							<th class="w60"></th>
 							<th class="w180" colspan="3">出勤</th>
 							<th class="w180" colspan="3">退勤</th>
 							<th class="w80">中抜け時間</th>
@@ -63,10 +64,12 @@
 								</th:block>
 								<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
 								<td class="w140">[[${dailyAttendanceForm.sectionName}]]</td>
-
+								<td class="w60"><input type="button" class="btn btn-info update-button" value="定時" th:onclick="|setRegularhours(${stat.index});|"></td>
 								<!-- 出勤（時）のセレクトボックス -->
 								<td class="w70">
-									<select class="form-control"
+									<select 
+										th:id="|dispStartHour__${stat.index}__|"
+										class="form-control"
 										th:field="*{attendanceList[__${stat.index}__].dispStartHour}"
 										th:errorclass="has-error">
 										<option th:each="hour : *{hourMap}" th:value="${hour.key}"
@@ -76,7 +79,9 @@
 								</td>
 								<td>:</td>
 								<td>
-									<select class="form-control"
+									<select 
+										th:id="|dispStartMinute__${stat.index}__|"
+										class="form-control"
 										th:field="*{attendanceList[__${stat.index}__].dispStartMinute}"
 										th:errorclass="has-error"
 										>
@@ -87,7 +92,9 @@
 								</td>
 
 								<td>
-									<select class="form-control"
+									<select 
+										th:id="|dispEndHour__${stat.index}__|" 
+										class="form-control"
 										th:field="*{attendanceList[__${stat.index}__].dispEndHour}"
 										th:errorclass="has-error">
 										<option th:each="hour : *{hourMap}" th:value="${hour.key}"
@@ -96,7 +103,9 @@
 								</td>
 								<td>:</td>
 								<td>
-									<select class="form-control"
+									<select 
+										th:id="|dispEndMinute__${stat.index}__|" 
+										class="form-control"
 										th:field="*{attendanceList[__${stat.index}__].dispEndMinute}"
 										th:errorclass="has-error">
 										<option th:each="minute : *{minuteMap}" th:value="${minute.key}"
@@ -132,7 +141,7 @@
 					<th:block th:if="${session.loginUserDto.role != '0001'}">
 						<input type="submit" value="戻る" name="indexCompany" class="btn btn-default" />
 					</th:block>
-					<input type="submit" value="更新" name="complete" class="btn btn-info" onclick="registCheck();" />
+					<input type="submit" value="更新" name="complete" class="btn btn-info" onclick="return registCheck();" />
 				</div>
 				
 
@@ -156,6 +165,18 @@
 			else {
 				return false;
 			}
+		}
+		
+		function setRegularhours(index){
+			const startHourTarget = document.getElementById("dispStartHour"+index);
+			const startMinuteTarget = document.getElementById("dispStartMinute"+index);
+			const endHourTarget = document.getElementById("dispEndHour"+index);
+			const endMinuteTarget = document.getElementById("dispEndMinute"+index);
+			
+			startHourTarget.value = "9";
+			startMinuteTarget.value = "0";
+			endHourTarget.value = "18";
+			endMinuteTarget.value = "0";
 		}
 	</script>
 	<style>

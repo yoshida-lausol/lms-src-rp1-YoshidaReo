@@ -54,8 +54,9 @@ public class AttendanceController {
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 
+		// 吉田令生 – Task.25
 		// 未記入日の確認
-		boolean hasBlankEntry = studentAttendanceService.notEnterCheck();
+		Boolean hasBlankEntry = studentAttendanceService.notEnterCheck();
 		model.addAttribute("hasBlankEntry", hasBlankEntry);
 
 		return "attendance/detail";
@@ -154,11 +155,7 @@ public class AttendanceController {
 	        .collect(java.util.stream.Collectors.joining("<br>* ")); 
 			// エラー登録
 			model.addAttribute("error", allErrors);
-			
-			attendanceForm.setHourMap(attendanceUtil.getHourMap());
-			attendanceForm.setMinuteMap(attendanceUtil.getMinuteMap());
-			
-			
+						
 			return "attendance/update";
 		}
 		

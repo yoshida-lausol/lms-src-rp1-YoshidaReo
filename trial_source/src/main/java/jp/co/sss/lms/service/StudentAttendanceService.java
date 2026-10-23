@@ -353,8 +353,8 @@ public class StudentAttendanceService {
 	
 	/**
 	 * 現在日付より前日付で勤怠未入力数を取得
-	 * 
 	 * @throws ParseException
+	 * @author 吉田令生  – Task.25
 	 */
 	public Boolean notEnterCheck() throws ParseException{
 		
@@ -372,15 +372,17 @@ public class StudentAttendanceService {
 						loginUserDto.getLmsUserId(),
 						Constants.DB_FLG_FALSE,
 						trainingDate);
-		if(blankEntryCount > 0) {
-			return true;
-		}
-		return false;
+//		if(blankEntryCount > 0) {
+//			return true;
+//		}
+//		return false;
+		return blankEntryCount > 0;
 	}
 	
 	
 	/*
 	 * フォーム内の「時」と「分」の入力を、「hh:mm」形式の文字列に変換してAttendanceFormにセットする。
+	 * @author 吉田令生  – Task.26
 	 * */
 	public void formatConversion(AttendanceForm attendanceForm) {
 		for (DailyAttendanceForm dailyAttendanceForm : attendanceForm.getAttendanceList()) {
@@ -404,6 +406,7 @@ public class StudentAttendanceService {
 	/*
 	 * 勤怠更新時の入力チェック
 	 * (文字数、時刻の整合性、中抜け時間の妥当性)
+	 * @author 吉田令生  – Task.27
 	 * */
 	public void updateInputCheck(AttendanceForm attendanceForm, BindingResult result) {
 		
@@ -482,13 +485,13 @@ public class StudentAttendanceService {
 			//	出勤時間　＞　退勤時間　の場合
 				if(localEndTime.isBefore(localStartTime)) {
 					result.rejectValue(
-							"attendanceList["+index+"].dispStartHour",
+							"attendanceList["+index+"].dispEndHour",
 							null,
 							null,
 							""
 						);
 					result.rejectValue(
-							"attendanceList["+index+"].dispStartMinute",
+							"attendanceList["+index+"].dispEndMinute",
 							null,
 							null,
 							""
@@ -502,18 +505,21 @@ public class StudentAttendanceService {
 					if(totalMinute < dailyAttendanceForm.getBlankTime()) {
 						result.rejectValue(
 								"attendanceList["+index+"].blankTime",
-								null,
+								"attendance.blankTimeError",
 								null,
 								""
 							);
-						result.reject("attendance.blankTimeError",null,null);
+						
 					}
 				}
 				
 			}
-			
-			
 			index++;
+			
+			// select系を再設定
+			attendanceForm.setHourMap(attendanceUtil.getHourMap());
+			attendanceForm.setMinuteMap(attendanceUtil.getMinuteMap());
+			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 		}
 	}
 }

@@ -86,7 +86,7 @@
 		WHERE student_attendance_id = #{studentAttendanceId}
 	</update>
 	
-	
+	<!-- 吉田令生 – Task.25 -->
 	<select id="notEnterCount" resultType="Integer">
 		SELECT COUNT(*) 
 		FROM t_student_attendance
@@ -94,7 +94,9 @@
 			AND delete_flg = #{deleteFlg}
 			AND <![CDATA[ training_date < #{trainingDate} ]]>
 			AND status != 1
-			AND training_start_time = '' OR training_end_time = '' OR training_start_time IS NULL OR training_end_time IS NULL
-			
+			AND (training_start_time = '' 
+				OR training_end_time = '' 
+				OR training_start_time IS NULL 
+				OR training_end_time IS NULL)
 	</select>
 </mapper>
