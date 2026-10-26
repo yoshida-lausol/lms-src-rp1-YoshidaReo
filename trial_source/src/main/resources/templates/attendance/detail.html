@@ -78,16 +78,18 @@
 		
 		$(function() {
 			
+			$("#now").text('現在の時刻は　' + getClock() + '　です。');
+			setInterval(function() {
+				$("#now").text('現在の時刻は　' + getClock() + '　です。');
+			}, 1000);
+			
 			// 吉田令生 – Task.25
 			const isBlankEntry = /*[[${hasBlankEntry}]]*/ false;
 			if(isBlankEntry){
 				alert("過去日の勤怠に未入力があります。");
 			}
 			
-			$("#now").text('現在の時刻は　' + getClock() + '　です。');
-			setInterval(function() {
-				$("#now").text('現在の時刻は　' + getClock() + '　です。');
-			}, 1000);
+			
 		});
 		function getClock() {
 			const today =  new Date();
