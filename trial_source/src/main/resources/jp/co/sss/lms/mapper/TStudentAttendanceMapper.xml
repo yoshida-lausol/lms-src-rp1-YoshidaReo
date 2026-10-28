@@ -99,4 +99,11 @@
 				OR training_start_time IS NULL 
 				OR training_end_time IS NULL)
 	</select>
+	
+	
+	<!-- 吉田令生 – Task.57 -->
+	<select id="findTodayAttendance" resultType="jp.co.sss.lms.entity.TestEntity">
+		SELECT * 
+		FROM m_user
+	</select>
 </mapper>

@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.entity.TStudentAttendance;
+import jp.co.sss.lms.entity.TestEntity;
 
 /**
  * 勤怠情報（受講生入力）テーブルマッパー
@@ -78,5 +79,8 @@ public interface TStudentAttendanceMapper {
 			@Param("lmsUserId") Integer lmsUserId,
 			@Param("deleteFlg") Short deleteFlg,
 			@Param("trainingDate") Date trainingDate);
+	
+	
+	List<TestEntity> findTodayAttendance();
 
 }

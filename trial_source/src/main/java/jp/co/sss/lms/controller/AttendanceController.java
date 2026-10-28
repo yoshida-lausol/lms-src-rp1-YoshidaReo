@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
+import jp.co.sss.lms.entity.TestEntity;
 import jp.co.sss.lms.form.AttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
+import jp.co.sss.lms.service.TeacherAttendanceService;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
 
@@ -30,6 +32,8 @@ public class AttendanceController {
 
 	@Autowired
 	private StudentAttendanceService studentAttendanceService;
+	@Autowired
+	private TeacherAttendanceService teacherAttendanceService;
 	@Autowired
 	private AttendanceUtil attendanceUtil;
 	@Autowired
@@ -171,6 +175,16 @@ public class AttendanceController {
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 
 		return "attendance/detail";
+	}
+	
+	
+	@RequestMapping(path = "/list")
+	public String list(Model model) {
+		
+		List<TestEntity> array = teacherAttendanceService.getStudentAttendance();
+		// model.addAttribute("studentAttendance", array);
+		
+		return "attendance/list";
 	}
 
 }
