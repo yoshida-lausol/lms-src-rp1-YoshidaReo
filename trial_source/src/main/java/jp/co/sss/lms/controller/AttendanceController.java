@@ -11,13 +11,15 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
-import jp.co.sss.lms.entity.TestEntity;
+import jp.co.sss.lms.dto.UserDetailDto;
 import jp.co.sss.lms.form.AttendanceForm;
+import jp.co.sss.lms.form.StudentsListForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
-import jp.co.sss.lms.service.TeacherAttendanceService;
+import jp.co.sss.lms.service.TeacherService;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
 
@@ -33,7 +35,7 @@ public class AttendanceController {
 	@Autowired
 	private StudentAttendanceService studentAttendanceService;
 	@Autowired
-	private TeacherAttendanceService teacherAttendanceService;
+	private TeacherService teacherService;
 	@Autowired
 	private AttendanceUtil attendanceUtil;
 	@Autowired
@@ -178,13 +180,49 @@ public class AttendanceController {
 	}
 	
 	
+	
+	/**
+	 * 勤怠情報（講師入力）
+	 * @author 吉田令生 – Task.57
+	 * @return 生徒の勤怠確認画面
+	 */
 	@RequestMapping(path = "/list")
 	public String list(Model model) {
 		
-		List<TestEntity> array = teacherAttendanceService.getStudentAttendance();
-		// model.addAttribute("studentAttendance", array);
+		List<UserDetailDto> array = teacherService.getStudentList();
+		model.addAttribute("studentList", array);
+		
+		StudentsListForm studentsListForm = 
+				teacherService.setStudentsListForm();
+		model.addAttribute("studentsListForm", studentsListForm);
 		
 		return "attendance/list";
+	}
+	
+	/**
+	 * 勤怠管理画面(講師入力) 初期表示
+	 * @author 吉田令生 – Task.57
+	 * @param lmsUserId
+	 * @return 勤怠管理画面
+	 * @throws ParseException
+	 */
+	@RequestMapping(path = "/detail", params = {"lmsUserId", "courseId"}, method = RequestMethod.POST)
+	public String detailFromTeacher(
+			@RequestParam("lmsUserId") Integer lmsUserId,
+			@RequestParam("courseId") Integer courseId,
+			Model model) throws ParseException {
+
+		// 勤怠一覧の取得
+		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
+				.getAttendanceManagement(courseId, lmsUserId);
+		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
+
+		// 吉田令生 – Task.25
+		// 未記入日の確認
+		Boolean hasBlankEntry = studentAttendanceService.notEnterCheck();
+		model.addAttribute("hasBlankEntry", hasBlankEntry);
+
+		return "attendance/detail";
 	}
 
 }

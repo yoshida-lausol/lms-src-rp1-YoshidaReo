@@ -41,5 +41,14 @@
 		WHERE course_id = #{courseId}
 			AND delete_flg = 0
 	</select>
+	
+	<!-- 吉田令生 – Task.57 -->
+	<select id="findAllCourse" resultType="jp.co.sss.lms.entity.MCourse">
+		SELECT 
+			course_id AS courseId,
+			course_name AS courseName
+		FROM m_course 
+		ORDER BY course_id
+	</select>
 
 </mapper>

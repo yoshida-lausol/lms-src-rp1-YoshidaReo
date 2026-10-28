@@ -7,8 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
+import jp.co.sss.lms.dto.UserDetailDto;
 import jp.co.sss.lms.entity.TStudentAttendance;
-import jp.co.sss.lms.entity.TestEntity;
 
 /**
  * 勤怠情報（受講生入力）テーブルマッパー
@@ -81,6 +81,14 @@ public interface TStudentAttendanceMapper {
 			@Param("trainingDate") Date trainingDate);
 	
 	
-	List<TestEntity> findTodayAttendance();
+	/**
+	 * ユーザー基本情報取得
+	 * @author 吉田令生  – Task.57
+	 * @param lmsUserId
+	 * @param deleteFlg
+	 * @return ユーザー基本情報DTO
+	 */
+	List<UserDetailDto> findTodayAttendance(@Param("role") String role,
+			@Param("deleteFlg") Short deleteFlg);
 
 }
