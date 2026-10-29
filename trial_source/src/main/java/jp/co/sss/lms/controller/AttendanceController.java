@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -182,15 +183,15 @@ public class AttendanceController {
 	
 	
 	/**
-	 * 勤怠情報（講師入力）
+	 * 勤怠情報一覧（講師）
 	 * @author 吉田令生 – Task.57
 	 * @return 生徒の勤怠確認画面
 	 */
 	@RequestMapping(path = "/list")
 	public String list(Model model) {
 		
-		List<UserDetailDto> array = teacherService.getStudentList();
-		model.addAttribute("studentList", array);
+		List<UserDetailDto> studentList = teacherService.getStudentList();
+		model.addAttribute("studentList", studentList);
 		
 		StudentsListForm studentsListForm = 
 				teacherService.setStudentsListForm();
@@ -200,7 +201,25 @@ public class AttendanceController {
 	}
 	
 	/**
-	 * 勤怠管理画面(講師入力) 初期表示
+	 * 勤怠情報一覧(講師) 検索フォームから送信
+	 * @author 吉田令生 – Task.57
+	 * @return 勤怠管理画面
+	 * @throws ParseException
+	 */
+	@RequestMapping(path = "/list", method = RequestMethod.POST)
+	public String searchStAttendance(
+			@ModelAttribute("studentsListForm") StudentsListForm studentsListForm,
+			Model model
+			) {
+		List<UserDetailDto> studentList = teacherService.searchStudentList(studentsListForm);
+		model.addAttribute("studentList", studentList);
+		
+		
+		return "attendance/list";
+	}
+	
+	/**
+	 * 勤怠管理画面(講師) 初期表示
 	 * @author 吉田令生 – Task.57
 	 * @param lmsUserId
 	 * @return 勤怠管理画面
@@ -224,5 +243,7 @@ public class AttendanceController {
 
 		return "attendance/detail";
 	}
-
+	
+	
+	
 }

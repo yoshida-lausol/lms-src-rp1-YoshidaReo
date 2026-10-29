@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.UserDetailDto;
 import jp.co.sss.lms.entity.TStudentAttendance;
+import jp.co.sss.lms.form.StudentsListForm;
 
 /**
  * 勤怠情報（受講生入力）テーブルマッパー
@@ -82,13 +83,26 @@ public interface TStudentAttendanceMapper {
 	
 	
 	/**
-	 * ユーザー基本情報取得
+	 * 生徒勤怠情報:取得
 	 * @author 吉田令生  – Task.57
-	 * @param lmsUserId
+	 * @param role
 	 * @param deleteFlg
 	 * @return ユーザー基本情報DTO
 	 */
 	List<UserDetailDto> findTodayAttendance(@Param("role") String role,
 			@Param("deleteFlg") Short deleteFlg);
+	
+	/**
+	 * 生徒勤怠情報:検索
+	 * @author 吉田令生  – Task.57
+	 * @param role
+	 * @param deleteFlg
+	 * @return ユーザー基本情報DTO
+	 */
+	List<UserDetailDto> searchStudentAttendance(
+			@Param("role") String role,
+			@Param("deleteFlg") Short deleteFlg,
+			@Param("studentsListForm") StudentsListForm studentsListForm
+			);
 
 }
